@@ -101,3 +101,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+#What does mean? Will it break things when I change it to false?
+VERIFY_SSL = False
+
+
+###CUSTOM###
+
+CLIENT_ID = 'MY4I4TGVUUGOLDBAW1Q003CZK5WFZFU4RBRCTO5H5VXB41JE'
+CLIENT_SECRET = 'C3TWTGHIFSY2X2AXFHC5SZM1VXM1G2XRHWU0FHVYBUBJVFX0'
+FOURSQUARE_VERSION = '20130815'
+LOCATION = "Brooklyn, NY"
