@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 #Non-Django imports
 import foursquare
 from twilio.rest import TwilioRestClient
-from xml.sax.saxutils import quoteattr
+from xml.sax.saxutils import escape
 
 @csrf_exempt
 def task(request):
