@@ -3,3 +3,4 @@ foursquare==1!2015.5.26
 requests==2.8.1
 six==1.10.0
 wheel==0.24.0
+twilio==4.6.0
