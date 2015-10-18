@@ -8,6 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 import foursquare
 from twilio.rest import TwilioRestClient
 from xml.sax.saxutils import escape
+from twilio.rest import TwilioRestClient
+
 
 @csrf_exempt
 def task(request):
@@ -40,12 +42,20 @@ def task(request):
         if venue_details_response.get('venues') and venue_details_response.get('venues')[0]:
             contact = venue_details_response.get('venues')[0].get('contact')
             location = venue_details_response.get('venues')[0].get('location')
-            if location.get('formattedAddress'):
-                twiml_response = '<Response><Message>Bingo. ' + " ".join(location.get('formattedAddress')) + ', ' + contact.get('phone') + '</Message></Response>'
-            else:
-                twiml_response = '<Response><Message>Bingo. ' + location.get('address','No Address!') + ', at ' + location.get('crossStreet','No crossStreet') + ', ' + contact.get('phone') + '</Message></Response>'
 
-    else:
-        twiml_response = '<Response><Message>Got the text "' + incoming_text.body + '." Not sure what it means.</Message></Response>'
-    twiml_response = escape(twiml_response)
-    return HttpResponse(twiml_response, content_type='text/xml')
+            client = TwilioRestClient(settings.ACCOUNT_SID, settings.AUTH_TOKEN)
+
+            if location.get('formattedAddress'):
+                message = client.messages.create(
+                    body = 'Bingo. ' + " ".join(location.get('formattedAddress')) + ', ' + contact.get('phone'),
+                    to = incoming_text.from_number,
+                    from_ = settings.TWILIO_NUMBER,
+                )
+            else:
+                message = client.messages.create(
+                    body = 'Bingo. ' + location.get('address','No Address!') + ', at ' + location.get('crossStreet','No crossStreet') + ', ' + contact.get('phone'),
+                    to = incoming_text.from_number,
+                    from_ = settings.TWILIO_NUMBER
+                )
+
+    return HttpResponse("Received")
