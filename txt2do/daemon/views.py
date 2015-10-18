@@ -27,6 +27,7 @@ def task(request):
         #Why not both? <3 Love Toph
         #handle flags function, treat in generalized way, make easy to add new flags with new behavior
         # flags = .split('-') ???????
+        near_param = ""
         if '-n' in incoming_text.body:
             start_index = incoming_text.find('-n') + 2
             end_index = incoming_text[start_index:].find('-') + start_index
