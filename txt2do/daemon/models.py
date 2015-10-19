@@ -7,10 +7,6 @@ class BaseModel(models.Model):
     class Meta:
         abstract=True
 
-class Task(BaseModel):
-    query = models.CharField(max_length=100)
-    response = models.TextField(null=True)
-
 #Map one-to-one to twilio POSTed object
 class Text(BaseModel):
     body = models.TextField()#max_length = 1600 characters
