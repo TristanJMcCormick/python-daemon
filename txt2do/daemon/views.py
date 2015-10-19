@@ -3,6 +3,8 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServer
 from models import Text
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+
 
 #Non-Django imports
 import foursquare
@@ -15,10 +17,13 @@ from datetime import datetime
 
 
 '''
-This is the only endpoint right now. It handles incoming tasks 
+This is the only endpoint right now. It handles posts from twilio to accomplish
+certain predetermined tasks. For now, that just means foursquare business detail
+queries.
 '''
 
 @csrf_exempt
+@require_http_methods(["POST"])
 def task(request):
     incoming_text = Text.objects.create(
     body = request.POST.get('Body', 'No message body').lower(),
@@ -26,16 +31,16 @@ def task(request):
     from_number = request.POST.get('From'),
     to_number = request.POST.get('To'),
     )
-    twiml_response = 'No response. Something is wrong!'
-
     try:
         twilio_client = TwilioRestClient(settings.ACCOUNT_SID, settings.AUTH_TOKEN)
         if incoming_text.body:
-            query_parts = incoming_text.body.lower().split('-')
+
             # Split out the pre-flag text, this will indicate the task to accomplish and any required keywords
+            query_parts = incoming_text.body.lower().split('-')
             task_type = query_parts[0].split(' ',1)[0]
             task_query = query_parts[0].split(' ',1)[1]
             flags = query_parts[1:]
+
             #Handle foursquare task
             if task_type == 'foursquare':
                 if not task_query:
@@ -46,11 +51,13 @@ def task(request):
                     )
                     return HttpResponseBadRequest("Query malformed")
                 near_param = ''
+                #Right now only handle a "near" parameter that specifies a neighborhood.
                 if flags and 'n ' in flags[0]:
                     near_param = flags[0][1:].strip()
                 try:
                     foursquare_client = foursquare.Foursquare(client_id=settings.CLIENT_ID, client_secret=settings.CLIENT_SECRET, version=settings.FOURSQUARE_VERSION)
                     venue_details_response = foursquare_client.venues.search(params={'query': task_query,'near':settings.LOCATION if not near_param else near_param})
+
                     if venue_details_response.get('venues') and venue_details_response.get('venues')[0]:
                         contact = venue_details_response.get('venues')[0].get('contact')
                         location = venue_details_response.get('venues')[0].get('location')
