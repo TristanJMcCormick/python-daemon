@@ -14,6 +14,10 @@ from twilio.rest.exceptions import TwilioRestException
 from datetime import datetime
 
 
+'''
+This is the only endpoint right now. It handles incoming tasks 
+'''
+
 @csrf_exempt
 def task(request):
     incoming_text = Text.objects.create(
@@ -75,6 +79,8 @@ def task(request):
                             to = settings.ADMIN_NUMBER,
                             from_ = settings.TWILIO_NUMBER,
                         )
+                        return HttpResponse("Nothing returned for that query")
+
                 except EndpointError as ex:
                     admin_error_message = twilio_client.messages.create(
                         body = 'API down or query is malformed. Check logs once you keep them',
