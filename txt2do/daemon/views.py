@@ -36,11 +36,18 @@ def task(request):
         if incoming_text.body:
 
             # Split out the pre-flag text, this will indicate the task to accomplish and any required keywords
-            query_parts = incoming_text.body.lower().split('-')
-            task_type = query_parts[0].split(' ',1)[0]
-            task_query = query_parts[0].split(' ',1)[1]
-            flags = query_parts[1:]
-
+            try:
+                query_parts = incoming_text.body.lower().split('-')
+                task_type = query_parts[0].split(' ',1)[0]
+                task_query = query_parts[0].split(' ',1)[1]
+                flags = query_parts[1:]
+            except IndexError as ex:
+                user_error_message = twilio_client.messages.create(
+                    body = 'Something was wrong with the query. I can only handle foursquare right now, in the form: foursquare <queryterm> [-n <cityname>]',
+                    to = incoming_text.from_number,
+                    from_ = settings.TWILIO_NUMBER,
+                )
+                return HttpResponseBadRequest("Query malformed")
             #Handle foursquare task
             if task_type == 'foursquare':
                 if not task_query:
