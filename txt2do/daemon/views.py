@@ -8,8 +8,9 @@ from datetime import datetime
 
 #Non-Django imports
 from foursquare import InvalidAuth, EndpointError
+from client_libraries import FoursquareClient, TwilioClient
 from twilio.rest.exceptions import TwilioRestException
-from txt2do.client_libraries import FoursquareClient, TwilioClient
+
 
 
 
@@ -32,17 +33,16 @@ SMS_TEMPLATES = {
         'foursquare':'No results for that venue'
     },
     'QUERY_RESPONSE':{
-        'foursquare':'Found somewhere. {0}'
+        'foursquare':'Bingo. {0}'
     },
     'ADMIN_NOTIFIED':'Something went wrong with foursquare integration. Tristan is checking into it!',
     'NOTIFY_ADMIN':'Foursquare api is down or something. Check credentials and API status',
 }
 
-
-
 @csrf_exempt
 @require_http_methods(["POST"])
 def task(request):
+    return
     incoming_text = Text.objects.create(
         body = request.POST.get('Body', 'No message body').lower(),
         message_sid = request.POST.get('MessageSid'),
@@ -92,21 +92,31 @@ def task(request):
             the options are endless
         'query' : The text of the query for whatever service, task is being called
             e.g. Brooklyn Bagel
-        'flags' : A dictionary of flags
-            e.g. -n Brooklyn or -d 3 for "near brooklyn" and "depth of 3"
+        'flag_list' : The list of task flags to pass to arg_parse
+            e.g. '-n brooklyn -d 3' --> ['-n','brooklyn','-d','3']
+        'errors' : A string representing any errors with the incoming text to be
+            returned to the texter
     Note that this method depends on the text being formatted as
     "<keyword> <query> <-flag param -flag param...>" and will throw an error if
     it doesn't
 '''
 def _parse_task_parts(incoming_text):
-    print('in parsed task parts')
+    print('in parse_task_parts')
+    errors = ''
     sms_body = incoming_text.body.lower()
-    task_type = sms_body[:sms_body.find(' ')]
+    #Check for and grab the first word in the text.
+    if sms_body.find(' ') is not -1:
+        task_type = sms_body[:sms_body.find(' ')]
+    else:
+        errors += 'No task type specified'
+    #Grab the text from the first word to the first flag.
+    #Note that if flags are absent, the slice-ending index is -1, which
+    #(apparently) resolves to the end of the string. Which is fine in this case.
     task_query = sms_body[sms_body.find(' '):sms_body.find('-')].strip()
-    flags_string = sms_body[sms_body.find('-'):]
-    flags_dict = []
-    print repr(flags_string)
-    return
-    # print('flags', flags)
-    parsed_sms = {'task_type' : task_type, 'query' : task_query, 'flags' : flags}
+    #Check for and grab any flags
+    if sms_body.find('-') is not -1:
+        flags_list = sms_body.split(' ')#NOTE:ASSUMES NO SPACES WITHOUT FLAG
+    parsed_sms = {'task_type':task_type, 'query':task_query, 'flags':flags_list, 'errors':errors}
+    print 'parsed_sms'
+    print parsed_sms
     return parsed_sms
