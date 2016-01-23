@@ -6,6 +6,7 @@ from django.conf import settings
 TWILIO_CLIENT = {}
 FOURSQUARE_CLIENT = {}
 
+#Docs https://github.com/mLewisLogic/foursquare
 class FoursquareClient(object):
     def __init__(self):
         self.client = foursquare.Foursquare(
@@ -20,8 +21,6 @@ class FoursquareClient(object):
 class TwilioClient(object):
     def __init__(self):
         self.client = TwilioRestClient(settings.ACCOUNT_SID, settings.AUTH_TOKEN)
-    #Takes a query string and dictionary of optional flags, e.g. -n for near and TODO
-    # -d for depth
     def send_sms(self, sender, recipient, sms_body):
         self.client.messages.create(
             body = sms_body,
