@@ -18,23 +18,19 @@ def handle_foursquare_task(foursquare_task_object, sender):
         return HttpResponseBadRequest("Query malformed")
 
     task_namespace = _get_task_namespace_object(foursquare_task_object['flags'])
-
-    query_with_options = {'query':foursquare_task_object['query'], 'near':task_namespace.near[0]}
+    query_with_options = {'query':foursquare_task_object['query'], 'near':task_namespace.near}
     venues = foursquare_client.query_foursquare_venues(query_with_options, task_namespace.depth[0])
     if venues:
-        print len(venues)
-        return HttpResponse('dfas')
         for venue in venues:
             contact = venue.get('contact')
             location = venue.get('location')
             if location.get('formattedAddress'):
                 sms_body = SMS_TEMPLATES['QUERY_RESPONSE']['foursquare'].format(' '.join(location.get('formattedAddress', 'No Address')) + ', ' + contact.get('phone','No phone'))
                 twilio_client.send_sms(settings.TWILIO_NUMBER, sender, sms_body)
-                return HttpResponse("Success")
             else:
                 sms_body = SMS_TEMPLATES['QUERY_RESPONSE']['foursquare'].format(location.get('address','No Address') + ', at ' + location.get('crossStreet','No cross street') + ', ' + contact.get('phone','No phone'))
                 twilio_client.send_sms(settings.TWILIO_NUMBER, sender, sms_body)
-                return HttpResponse("Success")
+        return HttpResponse("Success")
     else:
         twilio_client.send_sms(settings.TWILIO_NUMBER, sender, SMS_TEMPLATES['NO_RESPONSE']['foursquare'])
         return HttpResponseNotFound("Nothing returned for that query")
@@ -57,6 +53,3 @@ def _get_task_namespace_object(foursquare_flags_list):
         type=int,
     )
     return argument_parser.parse_args(foursquare_flags_list)
-
-def _parse_foursquare_response(response):
-    pass
