@@ -68,6 +68,7 @@ def _parse_task_parts(incoming_text):
     #(apparently) resolves to the end of the string. Which is fine in this case.
     task_query = sms_body[sms_body.find(' '):sms_body.find('-')].strip()
     #Check for and grab any flags
+    flags_list = []
     if sms_body.find('-') is not -1:
         flags_list = sms_body[sms_body.find('-'):].split(' ')#NOTE:ASSUMES NO SPACES WITHOUT FLAG
     parsed_sms = {'task_type':task_type, 'query':task_query, 'flags':flags_list, 'errors':errors}

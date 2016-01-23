@@ -18,7 +18,8 @@ def handle_foursquare_task(foursquare_task_object, sender):
         return HttpResponseBadRequest("Query malformed")
 
     task_namespace = _get_task_namespace_object(foursquare_task_object['flags'])
-    query_with_options = {'query':foursquare_task_object['query'], 'near':task_namespace.near}
+
+    query_with_options = {'query':foursquare_task_object['query'], 'near':task_namespace.near[0]}
     venues = foursquare_client.query_foursquare_venues(query_with_options, task_namespace.depth[0])
     if venues:
         for venue in venues:
@@ -42,14 +43,14 @@ def _get_task_namespace_object(foursquare_flags_list):
         dest='near',
         action='store',
         nargs=1,
-        default=settings.FOURSQUARE_DEFAULT_LOCATION,
+        default=[settings.FOURSQUARE_DEFAULT_LOCATION],
     )
     argument_parser.add_argument(
         '-d',
         dest="depth",
         action='store',
         nargs=1,
-        default=1,
+        default=[1],
         type=int,
     )
-    return argument_parser.parse_args(foursquare_flags_list)
+    return argument_parser.parse_args(foursquare_flags_list or [])
