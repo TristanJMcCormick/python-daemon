@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest
 from models import Text
@@ -11,7 +10,7 @@ from datetime import datetime
 #Non-Django imports
 from client_libraries import TwilioClient
 from twilio.rest.exceptions import TwilioRestException
-from foursquare_helper import handle_foursquare_task
+import foursquare_wrapper
 from templates import SMS_TEMPLATES
 
 '''
@@ -35,7 +34,7 @@ def task(request):
     parsed_task = _parse_task_parts(incoming_text)
     #Handle foursquare task
     if parsed_task['task_type'] == 'foursquare':
-        return handle_foursquare_task(parsed_task, incoming_text.from_number)
+        return foursquare_wrapper.handle_foursquare_task(parsed_task, incoming_text.from_number)
     else:
         twilio_client.send_sms(settings.TWILIO_NUMBER, incoming_text.from_number, SMS_TEMPLATES['WRONG_TASK_TYPE'])
         return HttpResponseBadRequest("That task isn't supported yet. Just foursquare for now!")
