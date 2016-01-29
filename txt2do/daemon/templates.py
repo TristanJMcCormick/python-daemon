@@ -4,7 +4,7 @@ TASKS = [
 
 
 SMS_TEMPLATES = {
-    'WRONG_TASK_TYPE':'Something was wrong with the query. We can only handle ' + ' ,'.join(TASKS),
+    'WRONG_TASK_TYPE':'Something was wrong with the type of query. We can only handle ' + ' ,'.join(TASKS),
     'MALFORMED_QUERY':{
         'foursquare':'Something was wrong with the query. Does it have the form: foursquare <queryterm> [-n <cityname>]',
         },

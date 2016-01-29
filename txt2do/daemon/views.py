@@ -35,9 +35,11 @@ def task(request):
     #Handle foursquare task
     if parsed_task['task_type'] == 'foursquare':
         return foursquare_wrapper.handle_foursquare_task(parsed_task, incoming_text.from_number)
+    if parsed_task['task_type'] == 'budget':
+        return HttpResponse('Bloop!')
     else:
         twilio_client.send_sms(settings.TWILIO_NUMBER, incoming_text.from_number, SMS_TEMPLATES['WRONG_TASK_TYPE'])
-        return HttpResponseBadRequest("That task isn't supported yet. Just foursquare for now!")
+        return HttpResponseBadRequest()
     return HttpResponse('All branches should be handled, we shouldn\'t get here.')
 
 '''
